@@ -195,7 +195,7 @@ MonoBehaviour:
   maxAmmoReward: 15
   slowMotionFactor: 0.2
   slowMotionDuration: 5
-  zombiePrefab: {fileID: 8191504241715554215, guid: ba2e1a8b7e7e3204db792bcddff6196f, type: 3}
+  zombiePrefab: {fileID: 4653264090869847234, guid: ba2e1a8b7e7e3204db792bcddff6196f, type: 3}
   zombieSpawnPoints:
   - transform: {fileID: 556893338}
     spawnRadius: 10
@@ -214,7 +214,7 @@ MonoBehaviour:
     hasFinishedSpawning: 0
     currentZombiesSpawned: 0
   maxZombies: 20
-  spawnInterval: 5
+  spawnCheckInterval: 3
   ammoText: {fileID: 270969396}
   healthText: {fileID: 1783460590}
   crosshair: {fileID: 1865485845}
@@ -450,7 +450,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentAmmo: 30
   maxAmmo: 90
-  damage: 25
   fireRate: 0.1
   bulletPrefab: {fileID: 3904004162940357984, guid: b3d862283ce49004a856ce37d3150384, type: 3}
   firePoint: {fileID: 1580036740}
@@ -566,8 +565,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
-  m_fontSizeBase: 20
+  m_fontSize: 36
+  m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -6703,7 +6702,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 100
   currentHealth: 0
-  isPlayer: 0
+  isPlayer: 1
+  healthSlider: {fileID: 0}
+  healthFillImage: {fileID: 0}
+  fullHealthColor: {r: 0, g: 1, b: 0, a: 1}
+  lowHealthColor: {r: 1, g: 0, b: 0, a: 1}
   damageEffect: {fileID: 0}
   hurtSound: {fileID: 0}
   deathSound: {fileID: 0}
@@ -6890,7 +6893,7 @@ MonoBehaviour:
   maxAmmoReward: 15
   slowMotionFactor: 0.2
   slowMotionDuration: 5
-  zombiePrefab: {fileID: 8191504241715554215, guid: ba2e1a8b7e7e3204db792bcddff6196f, type: 3}
+  zombiePrefab: {fileID: 4653264090869847234, guid: ba2e1a8b7e7e3204db792bcddff6196f, type: 3}
   zombieSpawnPoints:
   - transform: {fileID: 556893338}
     spawnRadius: 10
@@ -6909,7 +6912,7 @@ MonoBehaviour:
     hasFinishedSpawning: 0
     currentZombiesSpawned: 0
   maxZombies: 20
-  spawnInterval: 5
+  spawnCheckInterval: 3
   ammoText: {fileID: 270969396}
   healthText: {fileID: 1783460590}
   crosshair: {fileID: 1865485845}
@@ -7534,8 +7537,8 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 4
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -7595,7 +7598,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 50, y: -30}
+  m_AnchoredPosition: {x: -14, y: -30}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 1, y: 1}
 --- !u!1 &1787685030
@@ -8019,63 +8022,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!1001 &7940525092029635779
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 4403634230408911400, guid: ba2e1a8b7e7e3204db792bcddff6196f, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4403634230408911400, guid: ba2e1a8b7e7e3204db792bcddff6196f, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 4403634230408911400, guid: ba2e1a8b7e7e3204db792bcddff6196f, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4403634230408911400, guid: ba2e1a8b7e7e3204db792bcddff6196f, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4403634230408911400, guid: ba2e1a8b7e7e3204db792bcddff6196f, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4403634230408911400, guid: ba2e1a8b7e7e3204db792bcddff6196f, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4403634230408911400, guid: ba2e1a8b7e7e3204db792bcddff6196f, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4403634230408911400, guid: ba2e1a8b7e7e3204db792bcddff6196f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4403634230408911400, guid: ba2e1a8b7e7e3204db792bcddff6196f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4403634230408911400, guid: ba2e1a8b7e7e3204db792bcddff6196f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8191504241715554215, guid: ba2e1a8b7e7e3204db792bcddff6196f, type: 3}
-      propertyPath: m_Name
-      value: Zombie
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: ba2e1a8b7e7e3204db792bcddff6196f, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -8091,4 +8037,3 @@ SceneRoots:
   - {fileID: 74523512}
   - {fileID: 1502206135}
   - {fileID: 1064199266}
-  - {fileID: 7940525092029635779}

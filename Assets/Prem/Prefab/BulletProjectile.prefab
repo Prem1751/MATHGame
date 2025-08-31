@@ -150,8 +150,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 50
-  damage: 25
+  damage: 50
   impactEffect: {fileID: 0}
   collisionMask:
     serializedVersion: 2
-    m_Bits: 9
+    m_Bits: 8

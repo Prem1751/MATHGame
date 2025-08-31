@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Health : MonoBehaviour
 {
@@ -8,6 +9,12 @@ public class Health : MonoBehaviour
     public int maxHealth = 100;
     public int currentHealth;
     public bool isPlayer = false;
+
+    [Header("UI Settings")]
+    public Slider healthSlider;
+    public Image healthFillImage;
+    public Color fullHealthColor = Color.green;
+    public Color lowHealthColor = Color.red;
 
     [Header("Effects")]
     public GameObject damageEffect;
@@ -24,7 +31,13 @@ public class Health : MonoBehaviour
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.spatialBlend = 1.0f;
         }
+
+        // ตั้งค่า UI
+        UpdateHealthUI();
+
+        Debug.Log(gameObject.name + " health initialized: " + currentHealth + "/" + maxHealth);
     }
 
     public void TakeDamage(int damage)
@@ -32,20 +45,25 @@ public class Health : MonoBehaviour
         if (currentHealth <= 0) return;
 
         currentHealth -= damage;
+        Debug.Log(gameObject.name + " took " + damage + " damage. Health: " + currentHealth + "/" + maxHealth);
 
+        // สร้างเอฟเฟกต์ damage
         if (damageEffect != null)
         {
-            Instantiate(damageEffect, transform.position, Quaternion.identity);
+            Instantiate(damageEffect, transform.position + Vector3.up, Quaternion.identity);
         }
 
+        // เล่นเสียง被击中
         if (audioSource != null && hurtSound != null)
         {
             audioSource.PlayOneShot(hurtSound);
         }
 
-        Debug.Log(gameObject.name + " took " + damage + " damage. Health: " + currentHealth);
+        // อัพเดท UI
+        UpdateHealthUI();
 
-        if (isPlayer)
+        // อัพเดท UI ถ้าเป็น玩家
+        if (isPlayer && GameManager.instance != null)
         {
             GameManager.instance.UpdateUI();
         }
@@ -56,8 +74,24 @@ public class Health : MonoBehaviour
         }
     }
 
+    void UpdateHealthUI()
+    {
+        if (healthSlider != null)
+        {
+            healthSlider.value = (float)currentHealth / maxHealth;
+        }
+
+        if (healthFillImage != null)
+        {
+            healthFillImage.color = Color.Lerp(lowHealthColor, fullHealthColor, (float)currentHealth / maxHealth);
+        }
+    }
+
     void Die()
     {
+        Debug.Log(gameObject.name + " died!");
+
+        // เล่นเสียงตาย
         if (audioSource != null && deathSound != null)
         {
             audioSource.PlayOneShot(deathSound);
@@ -67,10 +101,14 @@ public class Health : MonoBehaviour
         {
             Debug.Log("Player died! Game Over");
             // เพิ่มเกมโอเวอร์逻辑ที่นี่
+            if (GameManager.instance != null)
+            {
+                GameManager.instance.GameOver();
+            }
         }
         else
         {
-            Debug.Log(gameObject.name + " died");
+            // สำหรับศัตรู
             Destroy(gameObject, 2f);
         }
     }
@@ -78,12 +116,23 @@ public class Health : MonoBehaviour
     public void Heal(int amount)
     {
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        Debug.Log(gameObject.name + " healed for " + amount + ". Health: " + currentHealth + "/" + maxHealth);
 
-        if (isPlayer)
+        // อัพเดท UI
+        UpdateHealthUI();
+
+        if (isPlayer && GameManager.instance != null)
         {
             GameManager.instance.UpdateUI();
         }
+    }
 
-        Debug.Log(gameObject.name + " healed for " + amount + ". Health: " + currentHealth);
+    // สำหรับ testing
+    void OnMouseDown()
+    {
+        if (!isPlayer)
+        {
+            TakeDamage(25);
+        }
     }
 }
