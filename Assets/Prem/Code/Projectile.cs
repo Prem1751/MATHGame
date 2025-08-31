@@ -27,7 +27,9 @@ public class Projectile : MonoBehaviour
             Zombie zombie = other.GetComponent<Zombie>();
             if (zombie != null)
             {
-                zombie.TakeDamage(damage, transform.position);
+                // หาจุดชนที่ถูกต้อง
+                Vector3 hitPoint = other.ClosestPoint(transform.position);
+                zombie.TakeDamage(damage, hitPoint);
                 Debug.Log("ซอมบี้โดนยิง! damage: " + damage);
             }
         }

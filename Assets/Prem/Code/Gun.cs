@@ -1,46 +1,174 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class Gun : MonoBehaviour
 {
-    [Header("�׹ settings")]
-    public int currentAmmo = 30;
-    public int maxAmmo = 90;
+    [Header("การตั้งค่าปืน")]
     public float fireRate = 0.1f;
     public GameObject bulletPrefab;
     public Transform firePoint;
     public float bulletSpeed = 30f;
+    public ParticleSystem muzzleFlash;
+    public AudioClip shootSound;
+
+    [Header("ระบบรีโหลด")]
+    public int currentAmmo = 10;
+    public int magazineSize = 30;
+    public int reserveAmmo = 90;
+    public int maxReserveAmmo = 180;
+    public float reloadTime = 2.0f;
+    public bool autoReload = true;
+    public KeyCode reloadKey = KeyCode.R;
+
+    [Header("UI References")]
+    public Image reloadCircle;
+    public TextMeshProUGUI ammoText;
+    public GameObject reloadPanel;
+
+    [Header("Sound Effects")]
+    public AudioClip reloadSound;
+    public AudioClip dryFireSound;
 
     private float nextTimeToFire = 0f;
     private Camera playerCamera;
+    private AudioSource audioSource;
+    private bool isReloading = false;
+    private float reloadTimer = 0f;
 
     void Start()
     {
         playerCamera = Camera.main;
-        if (playerCamera == null)
+        audioSource = GetComponent<AudioSource>();
+
+        if (audioSource == null)
         {
-            playerCamera = GetComponentInParent<Camera>();
+            audioSource = gameObject.AddComponent<AudioSource>();
         }
+
+        UpdateAmmoUI();
+        HideReloadUI();
     }
 
     void Update()
     {
-        if (Input.GetButton("Fire1") && Time.time >= nextTimeToFire && currentAmmo > 0)
+        HandleShooting();
+        HandleReloadInput();
+        UpdateReloadProgress();
+    }
+
+    void HandleShooting()
+    {
+        if (Input.GetButton("Fire1") && Time.time >= nextTimeToFire && !isReloading)
         {
-            nextTimeToFire = Time.time + fireRate;
-            Shoot();
+            if (currentAmmo > 0)
+            {
+                Shoot();
+            }
+            else if (reserveAmmo > 0 && !isReloading)
+            {
+                // พยายามยิงแต่กระสุนหมด
+                if (audioSource != null && dryFireSound != null)
+                {
+                    audioSource.PlayOneShot(dryFireSound);
+                }
+
+                if (autoReload)
+                {
+                    StartReload();
+                }
+            }
         }
+    }
+
+    void HandleReloadInput()
+    {
+        if (isReloading) return;
+
+        // รีโหลดเมื่อกดปุ่ม R หรือกระสุนหมด (ถ้าเปิด autoReload)
+        if (Input.GetKeyDown(reloadKey) || (autoReload && currentAmmo == 0 && reserveAmmo > 0))
+        {
+            StartReload();
+        }
+    }
+
+    void StartReload()
+    {
+        if (reserveAmmo <= 0 || currentAmmo >= magazineSize || isReloading) return;
+
+        isReloading = true;
+        reloadTimer = 0f;
+
+        // แสดง UI รีโหลด
+        ShowReloadUI();
+
+        // เล่นเสียงรีโหลด
+        if (audioSource != null && reloadSound != null)
+        {
+            audioSource.PlayOneShot(reloadSound);
+        }
+
+        Debug.Log("เริ่มรีโหลด...");
+    }
+
+    void UpdateReloadProgress()
+    {
+        if (!isReloading) return;
+
+        reloadTimer += Time.deltaTime;
+
+        // อัพเดท UI วงกลม
+        if (reloadCircle != null)
+        {
+            float progress = reloadTimer / reloadTime;
+            reloadCircle.fillAmount = progress;
+        }
+
+        // รีโหลดเสร็จสิ้น
+        if (reloadTimer >= reloadTime)
+        {
+            CompleteReload();
+        }
+    }
+
+    void CompleteReload()
+    {
+        int ammoNeeded = magazineSize - currentAmmo;
+        int ammoToAdd = Mathf.Min(ammoNeeded, reserveAmmo);
+
+        currentAmmo += ammoToAdd;
+        reserveAmmo -= ammoToAdd;
+
+        isReloading = false;
+        HideReloadUI();
+
+        UpdateAmmoUI();
+        Debug.Log("รีโหลดเสร็จสิ้น! กระสุนปัจจุบัน: " + currentAmmo);
     }
 
     void Shoot()
     {
         currentAmmo--;
+        nextTimeToFire = Time.time + fireRate;
 
-        // �Ҩش������ (��ҧ˹�Ҩ�)
-        Vector3 targetPoint;
+        // Muzzle Flash
+        if (muzzleFlash != null)
+        {
+            muzzleFlash.Play();
+        }
+
+        // Sound
+        if (audioSource != null && shootSound != null)
+        {
+            audioSource.PlayOneShot(shootSound);
+        }
+
+        // หาจุดที่เล็ง
         Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         RaycastHit hit;
+        Vector3 targetPoint;
 
         if (Physics.Raycast(ray, out hit, 1000f))
         {
@@ -51,40 +179,108 @@ public class Gun : MonoBehaviour
             targetPoint = ray.GetPoint(1000f);
         }
 
-        // �ӹǳ��ȷҧ
+        // คำนวณทิศทาง
         Vector3 direction = (targetPoint - firePoint.position).normalized;
 
-        // ���ҧ����ع
+        // สร้างกระสุน
         if (bulletPrefab != null && firePoint != null)
         {
             GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.LookRotation(direction));
 
-            // ��駤������ǡ���ع
+            // ตั้งค่าความเร็วกระสุน
             Rigidbody rb = bullet.GetComponent<Rigidbody>();
             if (rb != null)
             {
                 rb.velocity = direction * bulletSpeed;
             }
 
-            Debug.Log("����ع�͡����! ��ȷҧ: " + direction);
+            // ตั้งค่า damage
+            Projectile projectile = bullet.GetComponent<Projectile>();
+            if (projectile != null)
+            {
+                // สามารถตั้งค่าความเสียหายได้ที่นี่
+            }
         }
 
-        // �Ѿഷ UI
+        UpdateAmmoUI();
+    }
+
+    public void AddAmmo(int amount)
+    {
+        reserveAmmo = Mathf.Min(reserveAmmo + amount, maxReserveAmmo);
+        UpdateAmmoUI();
+        Debug.Log("ได้รับกระสุน " + amount + " นัด! คลัง: " + reserveAmmo);
+    }
+
+    void UpdateAmmoUI()
+    {
+        if (ammoText != null)
+        {
+            ammoText.text = $"{currentAmmo} / {reserveAmmo}";
+        }
+
+        // อัพเดท GameManager UI
         if (GameManager.instance != null)
         {
             GameManager.instance.UpdateUI();
         }
     }
 
-    public void AddAmmo(int amount)
+    void ShowReloadUI()
     {
-        currentAmmo += amount;
-        if (currentAmmo > maxAmmo)
-            currentAmmo = maxAmmo;
-
-        if (GameManager.instance != null)
+        if (reloadPanel != null)
         {
-            GameManager.instance.UpdateUI();
+            reloadPanel.SetActive(true);
         }
+
+        if (reloadCircle != null)
+        {
+            reloadCircle.fillAmount = 0f;
+        }
+    }
+
+    void HideReloadUI()
+    {
+        if (reloadPanel != null)
+        {
+            reloadPanel.SetActive(false);
+        }
+    }
+
+    public bool CanShoot()
+    {
+        return !isReloading && currentAmmo > 0;
+    }
+
+    public bool IsReloading()
+    {
+        return isReloading;
+    }
+
+    // สำหรับการดีบัก
+    void OnGUI()
+    {
+        GUI.Label(new Rect(10, 30, 200, 20), $"กระสุน: {currentAmmo}/{magazineSize}");
+        GUI.Label(new Rect(10, 50, 200, 20), $"คลัง: {reserveAmmo}/{maxReserveAmmo}");
+        if (isReloading)
+        {
+            GUI.Label(new Rect(10, 70, 200, 20), "กำลังรีโหลด...");
+        }
+    }
+
+    // สำหรับ testing
+    public void ForceReload()
+    {
+        if (!isReloading)
+        {
+            StartReload();
+        }
+    }
+
+    public void SetAmmo(int current, int reserve)
+    {
+        currentAmmo = Mathf.Clamp(current, 0, magazineSize);
+        reserveAmmo = Mathf.Clamp(reserve, 0, maxReserveAmmo);
+        UpdateAmmoUI();
     }
 }

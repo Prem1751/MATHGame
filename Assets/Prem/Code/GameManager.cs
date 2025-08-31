@@ -491,7 +491,7 @@ public class GameManager : MonoBehaviour
     {
         if (ammoText != null && gun != null)
         {
-            ammoText.text = "กระสุน: " + gun.currentAmmo;
+            ammoText.text = "Ammo : " + gun.currentAmmo;
         }
 
         if (healthText != null && player != null)
@@ -499,7 +499,7 @@ public class GameManager : MonoBehaviour
             Health playerHealth = player.GetComponent<Health>();
             if (playerHealth != null)
             {
-                healthText.text = "สุขภาพ: " + playerHealth.currentHealth + "/100";
+                healthText.text = "Health: " + playerHealth.currentHealth + "/100";
             }
         }
     }
