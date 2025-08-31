@@ -174,7 +174,7 @@ public class TimerController : MonoBehaviour
             winPanel.SetActive(true);
             if (winText != null)
             {
-                winText.text = "ชนะ!\nเวลาเหลือ: " + FormatTime(currentTime);
+                winText.text = "You is winner in : " + FormatTime(currentTime);
             }
         }
 
