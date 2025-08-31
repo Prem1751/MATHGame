@@ -257,17 +257,6 @@ public class Gun : MonoBehaviour
         return isReloading;
     }
 
-    // สำหรับการดีบัก
-    void OnGUI()
-    {
-        GUI.Label(new Rect(10, 30, 200, 20), $"กระสุน: {currentAmmo}/{magazineSize}");
-        GUI.Label(new Rect(10, 50, 200, 20), $"คลัง: {reserveAmmo}/{maxReserveAmmo}");
-        if (isReloading)
-        {
-            GUI.Label(new Rect(10, 70, 200, 20), "กำลังรีโหลด...");
-        }
-    }
-
     // สำหรับ testing
     public void ForceReload()
     {

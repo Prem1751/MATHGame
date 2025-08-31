@@ -326,22 +326,47 @@ public class GameManager : MonoBehaviour
 
     public void ShowMathProblem(int ammoAmount)
     {
-        if (isMathPanelActive) return;
+        if (isMathPanelActive)
+        {
+            Debug.Log("Math panel is already active!");
+            return;
+        }
 
+        Debug.Log("Showing math problem for ammo: " + ammoAmount);
         StartCoroutine(ShowMathProblemCoroutine(ammoAmount));
     }
 
     private IEnumerator ShowMathProblemCoroutine(int ammoAmount)
     {
+        Debug.Log("Starting math problem coroutine");
+
         EnableSlowMotion();
         isMathPanelActive = true;
 
         yield return new WaitForEndOfFrame();
+        yield return new WaitForEndOfFrame();
 
-        if (mathPanel != null)
-            mathPanel.SetActive(true);
-        else
-            Debug.LogError("Math panel is not assigned!");
+        // ตรวจสอบ UI components
+        if (mathPanel == null)
+        {
+            Debug.LogError("Math panel is not assigned in GameManager!");
+            yield break;
+        }
+
+        if (mathProblemText == null)
+        {
+            Debug.LogError("Math problem text is not assigned!");
+            yield break;
+        }
+
+        if (answerInput == null)
+        {
+            Debug.LogError("Answer input is not assigned!");
+            yield break;
+        }
+
+        mathPanel.SetActive(true);
+        Debug.Log("Math panel activated");
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -351,6 +376,7 @@ public class GameManager : MonoBehaviour
         else
             Debug.LogWarning("FPS Controller not found");
 
+        // สร้างโจทย์คณิตศาสตร์
         string problem = "";
         correctAnswer = 0;
         currentAmmoReward = ammoAmount;
@@ -363,33 +389,26 @@ public class GameManager : MonoBehaviour
         {
             case 0:
                 correctAnswer = a + b;
-                problem = $"{a} + {b} = x";
+                problem = $"{a} + {b} = X";
                 break;
             case 1:
                 correctAnswer = a + b;
-                problem = $"x - {a} = {b}";
+                problem = $"X - {a} = {b}";
                 break;
             case 2:
                 correctAnswer = a - b;
-                problem = $"{a} - x = {b}";
+                problem = $"{a} - X = {b}";
                 break;
         }
 
-        if (mathProblemText != null)
-            mathProblemText.text = problem;
-        else
-            Debug.LogError("Math problem text not assigned!");
+        mathProblemText.text = problem;
+        answerInput.text = "";
 
-        if (answerInput != null)
-            answerInput.text = "";
-        else
-            Debug.LogError("Answer input not assigned!");
+        // Focus ที่ Input Field
+        answerInput.Select();
+        answerInput.ActivateInputField();
 
-        if (answerInput != null)
-        {
-            answerInput.Select();
-            answerInput.ActivateInputField();
-        }
+        Debug.Log("Math problem: " + problem + " (Answer: " + correctAnswer + ")");
     }
 
     public void SubmitAnswer()
@@ -444,6 +463,8 @@ public class GameManager : MonoBehaviour
 
         DisableSlowMotion();
         isMathPanelActive = false;
+
+        Debug.Log("Math panel closed");
     }
 
     public void EnableSlowMotion()
@@ -595,11 +616,6 @@ public class GameManager : MonoBehaviour
     public void GameOver()
     {
         Debug.Log("Game Over!");
-        // หยุดเกมชั่วคราว
         Time.timeScale = 0f;
-
-        // แสดง game over UI
-        // (เพิ่ม code ตามที่ต้องการ)
     }
-
 }
