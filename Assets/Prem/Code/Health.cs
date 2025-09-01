@@ -16,6 +16,10 @@ public class Health : MonoBehaviour
     public Color fullHealthColor = Color.green;
     public Color lowHealthColor = Color.red;
 
+    [Header("Damage Screen Effect")]
+    public Image redOverlay; // ลาก UI Image มาใส่ที่นี่
+    public float flashTime = 0.3f;
+
     [Header("Effects")]
     public GameObject damageEffect;
     public AudioClip hurtSound;
@@ -37,6 +41,12 @@ public class Health : MonoBehaviour
         // ตั้งค่า UI
         UpdateHealthUI();
 
+        // ซ่อนเอฟเฟ็กต์สีแดงตอนเริ่มเกม
+        if (redOverlay != null)
+        {
+            redOverlay.color = new Color(1, 0, 0, 0);
+        }
+
         Debug.Log(gameObject.name + " health initialized: " + currentHealth + "/" + maxHealth);
     }
 
@@ -46,6 +56,12 @@ public class Health : MonoBehaviour
 
         currentHealth -= damage;
         Debug.Log(gameObject.name + " took " + damage + " damage. Health: " + currentHealth + "/" + maxHealth);
+
+        // แสดงเอฟเฟ็กต์สีแดงเมื่อ玩家ถูกตี
+        if (isPlayer && redOverlay != null)
+        {
+            StartCoroutine(ShowDamageEffect());
+        }
 
         // สร้างเอฟเฟกต์ damage
         if (damageEffect != null)
@@ -72,6 +88,30 @@ public class Health : MonoBehaviour
         {
             Die();
         }
+    }
+
+    // ฟังก์ชันแสดงเอฟเฟ็กต์สีแดง
+    private IEnumerator ShowDamageEffect()
+    {
+        // แสดงสีแดงเต็มจอ
+        redOverlay.color = new Color(1, 0, 0, 0.8f);
+
+        // รอสักครู่
+        yield return new WaitForSeconds(flashTime);
+
+        // ค่อยๆ จางหาย
+        float timer = 0f;
+        Color startColor = redOverlay.color;
+        Color endColor = new Color(1, 0, 0, 0);
+
+        while (timer < flashTime)
+        {
+            redOverlay.color = Color.Lerp(startColor, endColor, timer / flashTime);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        redOverlay.color = endColor;
     }
 
     void UpdateHealthUI()
