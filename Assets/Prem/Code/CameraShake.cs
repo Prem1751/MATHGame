@@ -1,44 +1,48 @@
+using System.Collections;
 using UnityEngine;
 
 public class CameraShake : MonoBehaviour
 {
-    public static CameraShake Instance;
+    [Header("Shake Settings")]
+    public float shakeDuration = 0.5f;
+    public float shakeMagnitude = 0.1f;
+    public float dampingSpeed = 1.0f;
 
-    private Vector3 originalPosition;
-    private float shakeDuration = 0f;
-    private float shakeMagnitude = 0.2f;
+    private Vector3 initialPosition;
+    private float currentShakeDuration = 0f;
+    private float currentShakeMagnitude = 0f;
 
     void Awake()
     {
-        if (Instance == null)
+        if (Camera.main != null)
         {
-            Instance = this;
+            initialPosition = Camera.main.transform.localPosition;
         }
-        else
-        {
-            Destroy(gameObject);
-        }
-
-        originalPosition = transform.localPosition;
     }
 
     void Update()
     {
-        if (shakeDuration > 0)
+        if (currentShakeDuration > 0)
         {
-            transform.localPosition = originalPosition + Random.insideUnitSphere * shakeMagnitude;
-            shakeDuration -= Time.deltaTime;
+            Camera.main.transform.localPosition = initialPosition + Random.insideUnitSphere * currentShakeMagnitude;
+            currentShakeDuration -= Time.deltaTime * dampingSpeed;
         }
         else
         {
-            shakeDuration = 0f;
-            transform.localPosition = originalPosition;
+            currentShakeDuration = 0f;
+            Camera.main.transform.localPosition = initialPosition;
         }
     }
 
-    public void ShakeCamera(float magnitude, float duration)
+    public void ShakeCamera(float duration, float magnitude)
     {
-        shakeMagnitude = magnitude;
-        shakeDuration = duration;
+        currentShakeDuration = duration;
+        currentShakeMagnitude = magnitude;
+    }
+
+    public void ShakeCamera()
+    {
+        currentShakeDuration = shakeDuration;
+        currentShakeMagnitude = shakeMagnitude;
     }
 }
