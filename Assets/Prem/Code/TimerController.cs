@@ -183,7 +183,7 @@ public class TimerController : MonoBehaviour
             winPanel.SetActive(true);
             if (winText != null)
             {
-                winText.text = "Changing Scene...";
+                winText.text = "The helicopter is coming....";
             }
         }
 
