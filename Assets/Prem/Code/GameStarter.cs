@@ -1,12 +1,14 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameStarter : MonoBehaviour
 {
+    public string Scene = "Main";
     public void StartGame()
     {
         // โหลด Scene ต่อไป (เปลี่ยน "GameScene" เป็นชื่อ Scene ของคุณ)
-        SceneManager.LoadScene("Main");
+        SceneManager.LoadScene(Scene);
     }
 
     public void QuitGame()

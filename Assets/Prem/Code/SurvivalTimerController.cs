@@ -29,6 +29,23 @@ public class SurvivalTimerController : MonoBehaviour
     public TMP_Text winText;
     public GameObject losePanel;
 
+    [Header("UI Buttons")]
+    public Button winRestartButton;
+    public Button winMainMenuButton;
+    public Button winQuitButton;
+    public Button loseRestartButton;
+    public Button loseMainMenuButton;
+    public Button loseQuitButton;
+
+    [Header("Keyboard Controls")]
+    public KeyCode mainMenuKey = KeyCode.M;
+    public KeyCode quitKey = KeyCode.Q;
+    public KeyCode restartKey = KeyCode.R;
+
+    [Header("UI Instructions")]
+    public TMP_Text winKeyboardInstructions;
+    public TMP_Text loseKeyboardInstructions;
+
     [Header("Sound Effects")]
     public AudioClip winSound;
     public AudioClip loseSound;
@@ -42,11 +59,16 @@ public class SurvivalTimerController : MonoBehaviour
     public Color warningColor = Color.red;
     public float warningFlashSpeed = 0.5f;
 
+    [Header("Scene Names")]
+    public string mainMenuSceneName = "MainMenu";
+
     private AudioSource audioSource;
     private AudioSource helicopterAudioSource;
     private bool warningPlayed = false;
     private bool helicopterSoundPlaying = false;
     private bool isGameOver = false;
+    private bool gameEndedWin = false; // ✅ เช็คว่าชนะหรือแพ้
+    private bool gameEndedLose = false;
 
     void Awake()
     {
@@ -76,10 +98,20 @@ public class SurvivalTimerController : MonoBehaviour
 
         if (winPanel != null) winPanel.SetActive(false);
         if (losePanel != null) losePanel.SetActive(false);
+
+        // ✅ ตั้งค่าปุ่ม UI
+        SetupButtons();
+        SetupKeyboardInstructions();
     }
 
     void Update()
     {
+        // ✅ เช็คคีย์บอร์ดเมื่อเกมจบ
+        if (gameEndedWin || gameEndedLose)
+        {
+            HandleKeyboardInput();
+        }
+
         if (isTimerRunning && !isGameOver)
         {
             currentTime -= Time.deltaTime;
@@ -108,6 +140,67 @@ public class SurvivalTimerController : MonoBehaviour
                 currentTime = 0;
                 PlayerSurvived();
             }
+        }
+    }
+
+    // ✅ จัดการคีย์บอร์ด
+    void HandleKeyboardInput()
+    {
+        if (Input.GetKeyDown(mainMenuKey))
+        {
+            MainMenu();
+        }
+        else if (Input.GetKeyDown(quitKey))
+        {
+            QuitGame();
+        }
+    }
+
+    // ✅ ตั้งค่าปุ่ม UI
+    void SetupButtons()
+    {
+        // Win Panel Buttons
+
+        if (winMainMenuButton != null)
+        {
+            winMainMenuButton.onClick.RemoveAllListeners();
+            winMainMenuButton.onClick.AddListener(MainMenu);
+        }
+
+        if (winQuitButton != null)
+        {
+            winQuitButton.onClick.RemoveAllListeners();
+            winQuitButton.onClick.AddListener(QuitGame);
+        }
+
+        // Lose Panel Buttons
+
+        if (loseMainMenuButton != null)
+        {
+            loseMainMenuButton.onClick.RemoveAllListeners();
+            loseMainMenuButton.onClick.AddListener(MainMenu);
+        }
+
+        if (loseQuitButton != null)
+        {
+            loseQuitButton.onClick.RemoveAllListeners();
+            loseQuitButton.onClick.AddListener(QuitGame);
+        }
+    }
+
+    // ✅ ตั้งค่าข้อความคำแนะนำ
+    void SetupKeyboardInstructions()
+    {
+        string instructions = $"Press [{restartKey}] Restart | [{mainMenuKey}] Main Menu | [{quitKey}] Quit";
+
+        if (winKeyboardInstructions != null)
+        {
+            winKeyboardInstructions.text = instructions;
+        }
+
+        if (loseKeyboardInstructions != null)
+        {
+            loseKeyboardInstructions.text = instructions;
         }
     }
 
@@ -249,6 +342,7 @@ public class SurvivalTimerController : MonoBehaviour
         if (isGameOver) return;
 
         isGameOver = true;
+        gameEndedWin = true; // ✅ เปิดใช้งานคีย์บอร์ด
         StopTimer();
         StopAllCoroutines();
 
@@ -258,7 +352,7 @@ public class SurvivalTimerController : MonoBehaviour
             StartCoroutine(FadeOutHelicopterSound());
         }
 
-        Debug.Log("ผู้เล่นรอดชีวิต! ชนะเกม");
+        Debug.Log("ผู้เล่นรอดชีวิต! ชนะเกม - Keyboard controls enabled");
 
         // แสดง UI ชนะ
         if (winPanel != null)
@@ -304,6 +398,7 @@ public class SurvivalTimerController : MonoBehaviour
         if (isGameOver) return;
 
         isGameOver = true;
+        gameEndedLose = true; // ✅ เปิดใช้งานคีย์บอร์ด
         StopTimer();
         StopAllCoroutines();
 
@@ -313,7 +408,7 @@ public class SurvivalTimerController : MonoBehaviour
             helicopterAudioSource.Stop();
         }
 
-        Debug.Log("ผู้เล่นตาย! แพ้เกม");
+        Debug.Log("ผู้เล่นตาย! แพ้เกม - Keyboard controls enabled");
 
         // แสดง UI แพ้
         if (losePanel != null)
@@ -341,22 +436,35 @@ public class SurvivalTimerController : MonoBehaviour
     }
 
     // สำหรับปุ่ม UI
-    public void RestartGame()
-    {
-        Time.timeScale = 1f;
-        UnityEngine.SceneManagement.SceneManager.LoadScene(
-            UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
-    }
 
     public void MainMenu()
     {
+        Debug.Log("Going to main menu: " + mainMenuSceneName);
         Time.timeScale = 1f;
-        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+        UnityEngine.SceneManagement.SceneManager.LoadScene(mainMenuSceneName);
     }
 
-    public void QuitGame()
+    public void QuitGame() 
     {
+        Debug.Log("Quitting game...");
         Application.Quit();
+
+        // สำหรับทดสอบใน Editor
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
     }
 
+    // ✅ ฟังก์ชันทดสอบ
+    [ContextMenu("Test Win")]
+    public void TestWin()
+    {
+        PlayerSurvived();
+    }
+
+    [ContextMenu("Test Lose")]
+    public void TestLose()
+    {
+        PlayerDied();
+    }
 }
